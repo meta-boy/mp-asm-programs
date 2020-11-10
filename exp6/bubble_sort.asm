@@ -1,0 +1,73 @@
+; Assembly language program to sort numbers in ascending/descending order
+
+.MODEL SMALL
+
+DATA SEGMENT
+N DB 4H, 2H, 1H, 6H, 3H
+LEN DW 5
+MSG1 DB 10, 13, 'THE GIVEN ARRAY IS:-', 10, 13, '$' 
+MSG2 DB 10, 13, 10, 13, 'THE SORTED ARRAY IS:-', 10, 13, '$' 
+ENDS
+
+PRINT_MSG MACRO MSG
+    MOV AH, 09H
+    LEA DX, MSG
+    INT 21H
+ENDM
+
+CODE SEGMENT
+ASSUME CS:CODE, DS:DATA
+
+START:
+	MOV AX, DATA
+	MOV DS, AX
+
+	PRINT_MSG MSG1	; display initial array
+	CALL ARRAY
+
+	MOV CX, LEN	; set counter
+	DEC CX
+
+OUTERLOOP:		; bubble sort
+	LEA SI, N      
+	MOV DX, CX
+
+INNERLOOP:    
+	MOV AL, [SI]
+	MOV BL, [SI+1]
+	CMP AL, BL
+	JC BORROW
+	MOV [SI], BL
+	MOV [SI+1], AL
+
+BORROW:   
+	INC SI   
+	DEC DX   
+	JNZ INNERLOOP   
+	LOOP OUTERLOOP
+
+	PRINT_MSG MSG2	; display sorted array
+	CALL ARRAY
+
+	MOV AH, 4CH
+	INT 21H
+
+ARRAY PROC
+	MOV CX, LEN
+	LEA SI, N
+	MOV AH, 02H
+
+DISPLAY1:
+	MOV DL, [SI]
+	ADD DL, 30H
+	INT 21H
+	MOV DL, 20H
+	INT 21H
+	INC SI
+	LOOP DISPLAY1
+
+	RET
+ARRAY ENDP
+
+ENDS
+END START
